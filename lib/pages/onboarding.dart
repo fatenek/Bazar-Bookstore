@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'sign_in.dart';
-import 'sign_up.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/SessionService.dart';
+import 'sign_in.dart';
+import 'home.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -13,6 +14,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentPage = 0;
+  final SessionService _sessionService = SessionService();
 
   final List<Map<String, String>> _pages = [
     {
@@ -44,10 +46,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboarding_seen', true);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SignUpPage()),
-      );
+
+      if (!mounted) return;
+
+      // Use SessionService to determine next page
+      if (_sessionService.isLoggedIn()) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const SignInPage()),
+        );
+      }
     }
   }
 
@@ -60,7 +73,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             Column(
               children: [
-                // Pages
                 Expanded(
                   child: PageView.builder(
                     controller: _controller,
@@ -101,8 +113,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                   ),
                 ),
-
-                // Dots indicator
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
@@ -122,8 +132,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Continue / Get Started
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -143,8 +151,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                 ),
-
-                // Sign in button under Get Started
                 if (_currentPage == _pages.length - 1)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 24.0),
@@ -167,8 +173,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
               ],
             ),
-
-            // Skip button (always on top left)
             Positioned(
               top: 16,
               left: 8,

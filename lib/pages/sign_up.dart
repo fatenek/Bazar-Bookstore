@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'verification_email.dart';
+import '../services/AuthService.dart'; // Add this import
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -16,7 +17,8 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _obscure = true;
   bool _isLoading = false;
 
-  final supabase = Supabase.instance.client;
+  final _authService =
+      AuthService(); // Use AuthService instead of direct Supabase client
 
   @override
   void dispose() {
@@ -46,26 +48,10 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {'name': name}, // Store name in user metadata
-      );
+      // Use AuthService instead of direct Supabase calls
+      final user = await _authService.signUp(name, email, password);
 
-      if (response.user != null) {
-        // Create or update profile in profiles table
-        try {
-          await supabase.from('profiles').upsert({
-            'id': response.user!.id,
-            'name': name,
-            'email': email,
-            'created_at': DateTime.now().toIso8601String(),
-          });
-        } catch (e) {
-          print('Profile creation error: $e');
-          // Continue even if profile creation fails
-        }
-
+      if (user != null) {
         if (!mounted) return;
 
         // Navigate to verification page

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'sign_in.dart';
 import 'home_tab.dart';
 import 'categories_tab.dart';
 import 'wishlist_tab.dart';
 import 'profile_tab.dart';
+import '../services/AuthService.dart'; // Add this import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,11 +15,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  final _authService = AuthService(); // Use AuthService
 
   final _pages = const [
     HomeTab(),
     CategoriesTab(),
-    WishlistTab(),
+    WishlistTab(), // now acts as Cart
     ProfileTab(),
   ];
 
@@ -45,7 +46,7 @@ class _HomePageState extends State<HomePage> {
 
     if (confirmed == true) {
       try {
-        await Supabase.instance.client.auth.signOut();
+        await _authService.signOut(); // Use AuthService
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
@@ -95,26 +96,46 @@ class _HomePageState extends State<HomePage> {
               fontSize: 12,
             ),
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.grey[150],
             elevation: 0,
             onTap: (index) => setState(() => _currentIndex = index),
-            items: const [
-              BottomNavigationBarItem(
+            items: [
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.explore_outlined),
-                activeIcon: Icon(Icons.explore),
-                label: 'Explore',
+                icon: Image.asset(
+                  "assets/icons/category.png",
+                  height: 24,
+                  width: 24,
+                  color: Colors.grey[400],
+                ),
+                activeIcon: Image.asset(
+                  "assets/icons/category.png",
+                  height: 24,
+                  width: 24,
+                  color: const Color(0xFF54408C),
+                ),
+                label: 'Categories',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_border),
-                activeIcon: Icon(Icons.favorite),
-                label: 'Wishlist',
+                icon: Image.asset(
+                  "assets/icons/cart.png",
+                  height: 24,
+                  width: 24,
+                  color: Colors.grey[400],
+                ),
+                activeIcon: Image.asset(
+                  "assets/icons/cart.png",
+                  height: 24,
+                  width: 24,
+                  color: const Color(0xFF54408C),
+                ),
+                label: 'Cart',
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.person_outline),
                 activeIcon: Icon(Icons.person),
                 label: 'Profile',

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/SessionService.dart';
 import 'sign_in.dart';
 import 'home.dart';
 import 'onboarding.dart';
@@ -14,6 +14,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final SessionService _sessionService = SessionService();
+
   @override
   void initState() {
     super.initState();
@@ -23,11 +25,9 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigate() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    final session = Supabase.instance.client.auth.currentSession;
+    if (!mounted) return;
 
-    if (!mounted) return; // prevent calling Navigator if widget disposed
-
-    if (session != null) {
+    if (_sessionService.isLoggedIn()) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),

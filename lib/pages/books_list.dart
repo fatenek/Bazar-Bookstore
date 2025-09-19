@@ -38,56 +38,68 @@ class _BooksListPageState extends State<BooksListPage> {
   }
 
   Widget _buildBookCard(Map<String, dynamic> book) {
+    final imageUrl = book['image_url'] ?? '';
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => BookDetailsPage(bookId: (book['id'] as int)),
+            builder: (_) => BookDetailsPage(bookId: book['id'] as int),
           ),
         );
       },
       child: Card(
-        elevation: 3,
+        elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Book cover
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-              child: Image.network(
-                book['cover_url'] ?? '',
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 180,
-                  width: double.infinity,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.book, size: 50),
+            // Image takes most of the card
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.book,
+                      size: 50,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
-            // Book info
+            // Compact title & price
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    book['title'] ?? 'No Title',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '\$${book['price'] ?? '0'}',
-                    style: const TextStyle(color: Colors.green),
-                  ),
+                  if (book['title'] != null)
+                    Text(
+                      book['title'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (book['price'] != null)
+                    Text(
+                      '\$${book['price'].toString()}',
+                      style: const TextStyle(
+                        color: Color(0xFF54408C), // purple
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -106,16 +118,13 @@ class _BooksListPageState extends State<BooksListPage> {
           : GridView.builder(
               padding: const EdgeInsets.all(8),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2 per row
+                crossAxisCount: 3,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
-                childAspectRatio: 0.65,
+                childAspectRatio: 0.7, // taller cards for bigger images
               ),
               itemCount: books.length,
-              itemBuilder: (context, index) {
-                final book = books[index];
-                return _buildBookCard(book);
-              },
+              itemBuilder: (context, index) => _buildBookCard(books[index]),
             ),
     );
   }

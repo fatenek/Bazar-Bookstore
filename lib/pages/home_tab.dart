@@ -3,8 +3,42 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'book_details.dart';
 import 'books_list.dart';
 import 'vendors_page.dart';
-import 'authors_page.dart'; // ✅ import AuthorsPage
-import 'author_details_page.dart'; // ✅ import AuthorDetailsPage
+import 'authors_page.dart';
+import 'author_details_page.dart';
+import 'dart:async';
+
+// Offer model
+class Offer {
+  final int id;
+  final String? title;
+  final int? discount;
+  final String? imageUrl;
+  final String? ctaText;
+
+  Offer({
+    required this.id,
+    this.title,
+    this.discount,
+    this.imageUrl,
+    this.ctaText,
+  });
+
+  factory Offer.fromJson(Map<String, dynamic> json) => Offer(
+    id: json['id'],
+    title: json['title'],
+    discount: json['discount'],
+    imageUrl: json['image_url'],
+    ctaText: json['cta_text'],
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'discount': discount,
+    'image_url': imageUrl,
+    'cta_text': ctaText,
+  };
+}
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -20,7 +54,7 @@ class _HomeTabState extends State<HomeTab> {
   List<Map<String, dynamic>> topWeekBooks = [];
   List<Map<String, dynamic>> vendors = [];
   List<Map<String, dynamic>> authors = [];
-  Map<String, dynamic>? specialOffer;
+  List<Offer> offers = [];
   bool isLoading = true;
 
   @override
@@ -36,27 +70,27 @@ class _HomeTabState extends State<HomeTab> {
           .select()
           .eq('is_featured', true)
           .limit(3);
-
       final topWeekResponse = await _supabase
           .from('books')
           .select()
           .eq('is_top_week', true)
           .limit(3);
-
       final vendorsResponse = await _supabase.from('vendors').select().limit(6);
-
       final authorsResponse = await _supabase.from('authors').select().limit(5);
-
-      final offerResponse = await _supabase.from('offers').select().limit(1);
+      final offersResponse = await _supabase.from('offers').select();
 
       setState(() {
         featuredBooks = List<Map<String, dynamic>>.from(featuredResponse);
         topWeekBooks = List<Map<String, dynamic>>.from(topWeekResponse);
         vendors = List<Map<String, dynamic>>.from(vendorsResponse);
         authors = List<Map<String, dynamic>>.from(authorsResponse);
-        if (offerResponse.isNotEmpty) {
-          specialOffer = offerResponse.first;
+
+        if (offersResponse != null) {
+          offers = List<Map<String, dynamic>>.from(
+            offersResponse,
+          ).map((e) => Offer.fromJson(e)).toList();
         }
+
         isLoading = false;
       });
     } catch (e) {
@@ -73,156 +107,82 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    if (isLoading) return const Center(child: CircularProgressIndicator());
 
-    return CustomScrollView(
-      slivers: [
-        // App Bar
-        SliverAppBar(
-          floating: true,
-          title: const Text(
-            'Home',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          actions: [
-            IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {},
-            ),
-          ],
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0,
-        ),
-
-        // === Special Offer ===
-        if (specialOffer != null) _buildSpecialOffer(),
-
-        // === Top of Week ===
-        if (topWeekBooks.isNotEmpty) ...[
-          _buildSectionHeader(
-            title: 'Top of Week',
-            onSeeAll: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BooksListPage()),
-              );
-            },
-          ),
-          _buildBooksList(topWeekBooks),
-        ],
-
-        // === Best Vendors ===
-        if (vendors.isNotEmpty) ...[
-          _buildSectionHeader(
-            title: 'Best Vendors',
-            onSeeAll: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => VendorsPage()),
-              );
-            },
-          ),
-          _buildVendorsList(),
-        ],
-
-        // === Authors ===
-        if (authors.isNotEmpty) ...[
-          _buildSectionHeader(
-            title: 'Authors',
-            onSeeAll: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AuthorsPage()), // ✅
-              );
-            },
-          ),
-          _buildAuthorsList(),
-        ],
-
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-      ],
-    );
-  }
-
-  // === Special Offer Card ===
-  Widget _buildSpecialOffer() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          height: 160,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF54408C), Color(0xFF8B5A9F)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+    return Container(
+      color: Colors.white,
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        specialOffer!['title'] ?? 'Special Offer',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Discount ${specialOffer!['discount'] ?? 25}%',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF54408C),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(specialOffer!['cta_text'] ?? 'Order Now'),
-                      ),
-                    ],
-                  ),
+                IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+                const Text(
+                  'Home',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
                 ),
-                if (specialOffer!['image_url'] != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      specialOffer!['image_url'],
-                      height: 100,
-                      width: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 100,
-                        width: 80,
-                        color: Colors.white24,
-                        child: const Icon(Icons.book, color: Colors.white),
-                      ),
-                    ),
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined),
+                  onPressed: () {},
+                ),
               ],
             ),
           ),
-        ),
+
+          // === Special Offers ===
+          if (offers.isNotEmpty)
+            SliverToBoxAdapter(child: SpecialOfferCarousel(offers: offers)),
+
+          // === Top of Week ===
+          if (topWeekBooks.isNotEmpty) ...[
+            _buildSectionHeader(
+              title: 'Top of Week',
+              onSeeAll: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BooksListPage()),
+                );
+              },
+            ),
+            _buildBooksList(topWeekBooks),
+          ],
+
+          // === Best Vendors ===
+          if (vendors.isNotEmpty) ...[
+            _buildSectionHeader(
+              title: 'Best Vendors',
+              onSeeAll: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => VendorsPage()),
+                );
+              },
+            ),
+            _buildVendorsList(),
+          ],
+
+          // === Authors ===
+          if (authors.isNotEmpty) ...[
+            _buildSectionHeader(
+              title: 'Authors',
+              onSeeAll: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AuthorsPage()),
+                );
+              },
+            ),
+            _buildAuthorsList(),
+          ],
+
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        ],
       ),
     );
   }
@@ -249,7 +209,7 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Book List ===
+  // === Books List ===
   Widget _buildBooksList(List<Map<String, dynamic>> books) {
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -258,70 +218,19 @@ class _HomeTabState extends State<HomeTab> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
           itemCount: books.length,
-          itemBuilder: (context, index) {
-            final book = books[index];
-            return _buildBookCard(book, context);
-          },
+          itemBuilder: (context, index) => _buildBookCard(books[index]),
         ),
       ),
     );
   }
 
-  // === Vendors List ===
-  Widget _buildVendorsList() {
-    return SliverToBoxAdapter(
-      child: SizedBox(
-        height: 120,
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          itemCount: vendors.length,
-          itemBuilder: (context, index) {
-            final vendor = vendors[index];
-            return _buildVendorCard(vendor);
-          },
-        ),
-      ),
-    );
-  }
-
-  // === Authors List ===
-  Widget _buildAuthorsList() {
-    return SliverToBoxAdapter(
-      child: SizedBox(
-        height: 100,
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          itemCount: authors.length,
-          itemBuilder: (context, index) {
-            final author = authors[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        AuthorDetailsPage(authorId: author['id']), // ✅
-                  ),
-                );
-              },
-              child: _buildAuthorCard(author),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  // === Book Card ===
-  Widget _buildBookCard(Map<String, dynamic> book, BuildContext context) {
+  Widget _buildBookCard(Map<String, dynamic> book) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => BookDetailsPage(bookId: (book['id'] as int)),
+            builder: (_) => BookDetailsPage(bookId: book['id']),
           ),
         );
       },
@@ -334,7 +243,7 @@ class _HomeTabState extends State<HomeTab> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                book['cover_url'] ?? '',
+                book['image_url'] ?? '',
                 height: 200,
                 width: 160,
                 fit: BoxFit.cover,
@@ -367,21 +276,33 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Vendor Card ===
+  // === Vendors List ===
+  Widget _buildVendorsList() {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 120,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          scrollDirection: Axis.horizontal,
+          itemCount: vendors.length,
+          itemBuilder: (context, index) => _buildVendorCard(vendors[index]),
+        ),
+      ),
+    );
+  }
+
   Widget _buildVendorCard(Map<String, dynamic> vendor) {
     return Container(
       width: 100,
       margin: const EdgeInsets.only(right: 16),
       child: Column(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 80,
+              height: 80,
               color: Colors.grey[300],
-            ),
-            child: ClipOval(
               child: vendor['image_url'] != null
                   ? Image.network(
                       vendor['image_url'],
@@ -405,7 +326,34 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Author Card ===
+  // === Authors List ===
+  Widget _buildAuthorsList() {
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 100,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          scrollDirection: Axis.horizontal,
+          itemCount: authors.length,
+          itemBuilder: (context, index) {
+            final author = authors[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AuthorDetailsPage(authorId: author['id']),
+                  ),
+                );
+              },
+              child: _buildAuthorCard(author),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildAuthorCard(Map<String, dynamic> author) {
     return Container(
       width: 80,
@@ -440,6 +388,159 @@ class _HomeTabState extends State<HomeTab> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// === Special Offer Carousel ===
+class SpecialOfferCarousel extends StatefulWidget {
+  final List<Offer> offers;
+  const SpecialOfferCarousel({super.key, required this.offers});
+
+  @override
+  State<SpecialOfferCarousel> createState() => _SpecialOfferCarouselState();
+}
+
+class _SpecialOfferCarouselState extends State<SpecialOfferCarousel> {
+  late PageController _pageController;
+  int _currentPage = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    if (widget.offers.length > 1) _startAutoSlide();
+  }
+
+  void _startAutoSlide() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!mounted || !_pageController.hasClients) {
+        timer.cancel();
+        return;
+      }
+      int nextPage = (_currentPage + 1) % widget.offers.length;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 180,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: widget.offers.length,
+            onPageChanged: (index) => setState(() => _currentPage = index),
+            itemBuilder: (context, index) {
+              final offer = widget.offers[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                offer.title ?? 'Special Offer',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Discount ${offer.discount ?? 25}%',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF54408C),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                child: Text(offer.ctaText ?? 'Order Now'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (offer.imageUrl != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              offer.imageUrl!,
+                              height: 250,
+                              width: 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    height: 100,
+                                    width: 80,
+                                    color: Colors.white24,
+                                    child: const Icon(
+                                      Icons.book,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            widget.offers.length,
+            (index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: _currentPage == index ? 12 : 8,
+              height: _currentPage == index ? 12 : 8,
+              decoration: BoxDecoration(
+                color: _currentPage == index
+                    ? const Color(0xFF54408C)
+                    : Colors.grey,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

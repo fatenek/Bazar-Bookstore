@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/AuthService.dart'; // Add this import
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -14,7 +15,8 @@ class _SignInPageState extends State<SignInPage> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  final supabase = Supabase.instance.client;
+  final _authService =
+      AuthService(); // Use AuthService instead of direct Supabase client
 
   @override
   void dispose() {
@@ -41,12 +43,10 @@ class _SignInPageState extends State<SignInPage> {
 
     setState(() => _isLoading = true);
     try {
-      final response = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      // Use AuthService instead of direct Supabase calls
+      final user = await _authService.signIn(email, password);
 
-      if (response.user != null && mounted) {
+      if (user != null && mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } on AuthException catch (e) {

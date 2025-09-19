@@ -67,9 +67,7 @@ class _VerifyPhonePageState extends State<VerifyPhonePage> {
                     style: TextStyle(color: Colors.grey),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      // TODO: handle resend action
-                    },
+                    onTap: () {},
                     child: const Text(
                       "Resend",
                       style: TextStyle(

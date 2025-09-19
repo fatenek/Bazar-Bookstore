@@ -1,11 +1,10 @@
-//reset_password.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math';
 import 'verification_code.dart';
 
 class ResetPasswordInputPage extends StatefulWidget {
-  final String method; // 'email' or 'phone'
+  final String method;
 
   const ResetPasswordInputPage({Key? key, required this.method})
     : super(key: key);
@@ -19,65 +18,15 @@ class _ResetPasswordInputPageState extends State<ResetPasswordInputPage> {
   bool _isLoading = false;
 
   Future<void> _sendEmailCode(String email, String code) async {
-    // TODO: Replace this with your email service integration
-    // Example with EmailJS, SendGrid, Mailgun, etc.
-
-    // For now, using SnackBar for testing - REMOVE THIS IN PRODUCTION
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Code sent to $email: $code')));
-
-    // Example EmailJS integration:
-    /*
-    final response = await http.post(
-      Uri.parse('https://api.emailjs.com/api/v1.0/email/send'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'service_id': 'your_service_id',
-        'template_id': 'your_template_id',
-        'user_id': 'your_user_id',
-        'template_params': {
-          'to_email': email,
-          'verification_code': code,
-          'subject': 'Password Reset Verification Code',
-        }
-      }),
-    );
-    
-    if (response.statusCode != 200) {
-      throw Exception('Failed to send email');
-    }
-    */
   }
 
   Future<void> _sendSMSCode(String phone, String code) async {
-    // TODO: Replace this with your SMS service integration
-    // Example with Twilio, AWS SNS, etc.
-
-    // For now, using SnackBar for testing - REMOVE THIS IN PRODUCTION
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Code sent to $phone: $code')));
-
-    // Example Twilio integration:
-    /*
-    final response = await http.post(
-      Uri.parse('https://api.twilio.com/2010-04-01/Accounts/YOUR_ACCOUNT_SID/Messages.json'),
-      headers: {
-        'Authorization': 'Basic ' + base64Encode(utf8.encode('YOUR_ACCOUNT_SID:YOUR_AUTH_TOKEN')),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'From': 'YOUR_TWILIO_PHONE_NUMBER',
-        'To': phone,
-        'Body': 'Your password reset verification code is: $code',
-      },
-    );
-    
-    if (response.statusCode != 201) {
-      throw Exception('Failed to send SMS');
-    }
-    */
   }
 
   Future<void> _sendResetCode() async {

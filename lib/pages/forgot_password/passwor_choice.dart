@@ -10,7 +10,7 @@ class ForgotPasswordChoicePage extends StatefulWidget {
 }
 
 class _ForgotPasswordChoicePageState extends State<ForgotPasswordChoicePage> {
-  String? _selected; // 'email' or 'phone'
+  String? _selected;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +45,8 @@ class _ForgotPasswordChoicePageState extends State<ForgotPasswordChoicePage> {
             ),
             const SizedBox(height: 32),
 
-            /// Row with Phone on left and Email on right
             Row(
               children: [
-                /// Phone card (left)
-
-                /// Email card (right)
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selected = 'email'),

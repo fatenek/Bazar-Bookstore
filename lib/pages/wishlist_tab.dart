@@ -30,7 +30,6 @@ class _WishlistTabState extends State<WishlistTab> {
         return;
       }
 
-      // Get wishlist items with book details
       final response = await _supabase
           .from('wishlist')
           .select('''
@@ -212,7 +211,6 @@ class _WishlistTabState extends State<WishlistTab> {
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () {
-              // Switch to home tab or categories tab
               DefaultTabController.of(context)?.animateTo(0);
             },
             style: ElevatedButton.styleFrom(
@@ -235,7 +233,6 @@ class _WishlistTabState extends State<WishlistTab> {
       onRefresh: _loadWishlist,
       child: Column(
         children: [
-          // Wishlist summary
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -284,7 +281,6 @@ class _WishlistTabState extends State<WishlistTab> {
             ),
           ),
 
-          // Wishlist items
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -323,7 +319,6 @@ class _WishlistTabState extends State<WishlistTab> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Book image
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
@@ -341,7 +336,6 @@ class _WishlistTabState extends State<WishlistTab> {
             ),
             const SizedBox(width: 12),
 
-            // Book details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,7 +376,6 @@ class _WishlistTabState extends State<WishlistTab> {
               ),
             ),
 
-            // Action buttons
             Column(
               children: [
                 IconButton(
@@ -396,7 +389,6 @@ class _WishlistTabState extends State<WishlistTab> {
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () {
-                    // TODO: Navigate to book details or add to cart
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('View details for ${book['title']}'),

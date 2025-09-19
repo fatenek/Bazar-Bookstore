@@ -3,8 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'new_password.dart';
 
 class VerificationCodePage extends StatefulWidget {
-  final String method; // 'email' or 'phone'
-  final String contact; // the email or phone entered on the previous page
+  final String method;
+  final String contact;
 
   const VerificationCodePage({
     Key? key,
@@ -44,7 +44,6 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
     setState(() => _isLoading = true);
 
     try {
-      // Verify code from reset_codes table for both email and phone
       final response = await Supabase.instance.client
           .from('reset_codes')
           .select()
@@ -59,7 +58,6 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
         throw Exception('Invalid or expired code');
       }
 
-      // Mark code as used
       await Supabase.instance.client
           .from('reset_codes')
           .update({'used': true})
@@ -157,9 +155,7 @@ class _VerificationCodePageState extends State<VerificationCodePage> {
                   style: TextStyle(color: Colors.grey),
                 ),
                 GestureDetector(
-                  onTap: () {
-                    // TODO: handle resend action
-                  },
+                  onTap: () {},
                   child: const Text(
                     "Resend",
                     style: TextStyle(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'verification_email.dart';
-import '../services/AuthService.dart'; // Add this import
+import '../services/AuthService.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -17,8 +17,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _obscure = true;
   bool _isLoading = false;
 
-  final _authService =
-      AuthService(); // Use AuthService instead of direct Supabase client
+  final _authService = AuthService();
 
   @override
   void dispose() {
@@ -38,7 +37,6 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // Simple email format validation
     final emailReg = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailReg.hasMatch(email)) {
       _showSnack('Please enter a valid email', isError: true);
@@ -48,13 +46,11 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Use AuthService instead of direct Supabase calls
       final user = await _authService.signUp(name, email, password);
 
       if (user != null) {
         if (!mounted) return;
 
-        // Navigate to verification page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => VerifyEmailPage(email: email)),
@@ -85,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
     const primaryColor = Color(0xFF54408C);
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
@@ -94,7 +90,6 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back arrow
                 IconButton(
                   icon: const Icon(Icons.arrow_back),
                   color: Colors.black87,
@@ -181,7 +176,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Register button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -206,7 +200,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Sign in redirect
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -228,7 +221,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Terms info
                 Center(
                   child: RichText(
                     textAlign: TextAlign.center,

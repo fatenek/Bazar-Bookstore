@@ -55,7 +55,6 @@ class _BooksListPageState extends State<BooksListPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image takes most of the card
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(
@@ -75,7 +74,7 @@ class _BooksListPageState extends State<BooksListPage> {
                 ),
               ),
             ),
-            // Compact title & price
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Column(
@@ -95,7 +94,7 @@ class _BooksListPageState extends State<BooksListPage> {
                     Text(
                       '\$${book['price'].toString()}',
                       style: const TextStyle(
-                        color: Color(0xFF54408C), // purple
+                        color: Color(0xFF54408C),
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -121,7 +120,7 @@ class _BooksListPageState extends State<BooksListPage> {
                 crossAxisCount: 3,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
-                childAspectRatio: 0.7, // taller cards for bigger images
+                childAspectRatio: 0.7,
               ),
               itemCount: books.length,
               itemBuilder: (context, index) => _buildBookCard(books[index]),

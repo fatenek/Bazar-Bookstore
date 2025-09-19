@@ -16,7 +16,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   bool _loading = true;
   bool _inWishlist = false;
   int _quantity = 1;
-  int _userRating = 0; // User's rating (0-5)
+  int _userRating = 0;
 
   final supabase = Supabase.instance.client;
 
@@ -30,18 +30,14 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
     try {
       final user = supabase.auth.currentUser;
 
-      // Fetch book details (only fields that exist in your books table)
       final bookRes = await supabase
           .from('books')
           .select('id, title, price, image_url, description')
           .eq('id', widget.bookId)
           .single();
 
-      // For now, we'll skip vendor details since books table doesn't have vendor_id
-      // You can add vendor_id to books table later if needed
       Map<String, dynamic>? vendorData;
 
-      // Check if in wishlist (only if user is logged in)
       bool inWishlist = false;
       if (user != null) {
         final wishlistRes = await supabase
@@ -60,7 +56,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         _loading = false;
       });
     } catch (e) {
-      print('Error fetching book details: $e'); // For debugging
+      print('Error fetching book details: $e');
       setState(() {
         _loading = false;
       });
@@ -85,7 +81,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
 
     try {
       if (_inWishlist) {
-        // Remove from wishlist
         await supabase
             .from('wishlist')
             .delete()
@@ -98,7 +93,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
           );
         }
       } else {
-        // Add to wishlist
         await supabase.from('wishlist').insert({
           'user_id': user.id,
           'book_id': widget.bookId,
@@ -167,7 +161,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Book Cover Image
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -187,7 +180,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             ),
             const SizedBox(height: 20),
 
-            // Book Title and Heart Icon
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -216,46 +208,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             ),
             const SizedBox(height: 16),
 
-            // Vendor Section (placeholder for now since books table doesn't have vendor_id)
-            // You can uncomment this section after adding vendor_id to books table
-            /*
-            if (_vendor != null) ...[
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey[200],
-                    ),
-                    child: ClipOval(
-                      child: _vendor!['image_url'] != null
-                          ? Image.network(
-                              _vendor!['image_url'],
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.store, size: 20, color: Colors.grey),
-                            )
-                          : const Icon(Icons.store, size: 20, color: Colors.grey),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    _vendor!['name'] ?? 'Unknown Vendor',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
-            */
-
-            // Description
             Text(
               _book!['description'] ?? 'No description available.',
               style: const TextStyle(
@@ -266,7 +218,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             ),
             const SizedBox(height: 24),
 
-            // Reviews Section
             const Text(
               'Reviews',
               style: TextStyle(
@@ -277,7 +228,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             ),
             const SizedBox(height: 12),
 
-            // Star Rating
             Row(
               children: List.generate(5, (index) {
                 return GestureDetector(
@@ -296,11 +246,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             ),
             const SizedBox(height: 24),
 
-            // Quantity and Price Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Quantity Selector
                 Row(
                   children: [
                     IconButton(
@@ -344,7 +292,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     ),
                   ],
                 ),
-                // Total Price
+
                 Text(
                   "\$${_totalPrice.toStringAsFixed(2)}",
                   style: const TextStyle(
@@ -357,14 +305,11 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             ),
             const SizedBox(height: 40),
 
-            // Action Buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Continue shopping - no action needed
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF54408C),
                       foregroundColor: Colors.white,
@@ -387,7 +332,6 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      // Navigate to wishlist page (assuming it's tab index 2)
                       Navigator.pop(context);
                       DefaultTabController.of(context)?.animateTo(2);
                     },

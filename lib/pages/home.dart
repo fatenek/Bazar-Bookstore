@@ -4,7 +4,7 @@ import 'home_tab.dart';
 import 'categories_tab.dart';
 import 'wishlist_tab.dart';
 import 'profile_tab.dart';
-import '../services/AuthService.dart'; // Add this import
+import '../services/AuthService.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,12 +15,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  final _authService = AuthService(); // Use AuthService
+  final _authService = AuthService();
 
   final _pages = const [
     HomeTab(),
     CategoriesTab(),
-    WishlistTab(), // now acts as Cart
+    WishlistTab(),
     ProfileTab(),
   ];
 
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
 
     if (confirmed == true) {
       try {
-        await _authService.signOut(); // Use AuthService
+        await _authService.signOut();
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,

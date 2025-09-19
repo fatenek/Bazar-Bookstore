@@ -1,4 +1,3 @@
-// new_password.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'reset_success.dart';
@@ -47,36 +46,21 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
 
     try {
       if (widget.method == 'email') {
-        // Find user by email and update password
         final userResponse = await Supabase.instance.client
             .from('profiles')
             .select('user_id')
             .eq('email', widget.contact)
             .single();
 
-        // Update password via Admin API or use password reset flow
-        // Note: This is a simplified approach - in production you might need
-        // to use Supabase Admin API to update user password
         await Supabase.instance.client.auth.updateUser(
           UserAttributes(password: _passwordCtrl.text),
         );
       } else {
-        // For phone reset, find user by phone and update password
         final userResponse = await Supabase.instance.client
             .from('profiles')
             .select('user_id')
             .eq('phone', widget.contact)
             .single();
-
-        // Update password - this is a simplified approach
-        // In production, you might need to handle this differently
-        // as Supabase Auth doesn't directly support phone-based password resets
-
-        // You might need to use the Admin API here:
-        // await Supabase.instance.client.auth.admin.updateUserById(
-        //   userResponse['user_id'],
-        //   UserAttributes(password: _passwordCtrl.text),
-        // );
       }
 
       if (mounted) {

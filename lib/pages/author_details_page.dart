@@ -64,7 +64,6 @@ class _AuthorDetailsPageState extends State<AuthorDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile header
             Row(
               children: [
                 CircleAvatar(
@@ -118,7 +117,6 @@ class _AuthorDetailsPageState extends State<AuthorDetailsPage> {
             ),
             const SizedBox(height: 20),
 
-            // About section
             const Text(
               "About",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -130,7 +128,6 @@ class _AuthorDetailsPageState extends State<AuthorDetailsPage> {
             ),
             const SizedBox(height: 20),
 
-            // Products (books)
             const Text(
               "Products",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

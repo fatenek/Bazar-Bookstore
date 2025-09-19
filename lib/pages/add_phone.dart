@@ -42,7 +42,6 @@ class _AddPhonePageState extends State<AddPhonePage> {
               ),
               const SizedBox(height: 40),
 
-              // Label above input
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -52,7 +51,6 @@ class _AddPhonePageState extends State<AddPhonePage> {
               ),
               const SizedBox(height: 8),
 
-              // Input field with custom phone icon
               TextField(
                 controller: phoneCtrl,
                 keyboardType: TextInputType.phone,
@@ -90,7 +88,7 @@ class _AddPhonePageState extends State<AddPhonePage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  // Always active for now (just for UI)
+
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,

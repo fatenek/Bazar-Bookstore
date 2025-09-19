@@ -49,7 +49,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       if (!mounted) return;
 
-      // Use SessionService to determine next page
       if (_sessionService.isLoggedIn()) {
         Navigator.pushReplacement(
           context,

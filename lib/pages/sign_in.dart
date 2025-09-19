@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../services/AuthService.dart'; // Add this import
+import '../services/AuthService.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -15,8 +15,7 @@ class _SignInPageState extends State<SignInPage> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  final _authService =
-      AuthService(); // Use AuthService instead of direct Supabase client
+  final _authService = AuthService();
 
   @override
   void dispose() {
@@ -34,7 +33,6 @@ class _SignInPageState extends State<SignInPage> {
       return;
     }
 
-    // Optional: simple email check
     final emailReg = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailReg.hasMatch(email)) {
       _showSnack('Please enter a valid email address');
@@ -43,7 +41,6 @@ class _SignInPageState extends State<SignInPage> {
 
     setState(() => _isLoading = true);
     try {
-      // Use AuthService instead of direct Supabase calls
       final user = await _authService.signIn(email, password);
 
       if (user != null && mounted) {
@@ -97,7 +94,6 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Email
                 const Text(
                   "Email",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -118,7 +114,6 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Password
                 const Text(
                   "Password",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -157,7 +152,6 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Login button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -218,7 +212,6 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Google & Apple placeholders
                 _buildSocialButton("Google", "assets/icons/google.png"),
                 const SizedBox(height: 12),
                 _buildSocialButton("Apple", "assets/icons/apple.png"),
@@ -235,9 +228,7 @@ class _SignInPageState extends State<SignInPage> {
       width: double.infinity,
       height: 48,
       child: OutlinedButton.icon(
-        onPressed: () {
-          // TODO: implement $text sign-in
-        },
+        onPressed: () {},
         icon: Image.asset(asset, height: 20),
         label: Text(
           "Sign in with $text",

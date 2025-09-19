@@ -1,5 +1,5 @@
 class Profile {
-  final String id; // UUID
+  final String id;
   final String fullName;
   final String? avatarUrl;
 

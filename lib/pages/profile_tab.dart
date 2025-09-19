@@ -104,24 +104,12 @@ class _ProfileTabState extends State<ProfileTab> {
             Expanded(
               child: ListView(
                 children: [
-                  _profileRow('My Account', Icons.person, () {
-                    /* Navigate to My Account page */
-                  }),
-                  _profileRow('Address', Icons.location_on, () {
-                    /* Navigate to Address page */
-                  }),
-                  _profileRow('Offers & Promos', Icons.local_offer, () {
-                    /* Navigate */
-                  }),
-                  _profileRow('Your Favorites', Icons.favorite, () {
-                    /* Navigate */
-                  }),
-                  _profileRow('Order History', Icons.history, () {
-                    /* Navigate */
-                  }),
-                  _profileRow('Help Center', Icons.help_outline, () {
-                    /* Navigate */
-                  }),
+                  _profileRow('My Account', Icons.person, () {}),
+                  _profileRow('Address', Icons.location_on, () {}),
+                  _profileRow('Offers & Promos', Icons.local_offer, () {}),
+                  _profileRow('Your Favorites', Icons.favorite, () {}),
+                  _profileRow('Order History', Icons.history, () {}),
+                  _profileRow('Help Center', Icons.help_outline, () {}),
                 ],
               ),
             ),

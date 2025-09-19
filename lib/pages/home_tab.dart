@@ -7,39 +7,6 @@ import 'authors_page.dart';
 import 'author_details_page.dart';
 import 'dart:async';
 
-// Offer model
-class Offer {
-  final int id;
-  final String? title;
-  final int? discount;
-  final String? imageUrl;
-  final String? ctaText;
-
-  Offer({
-    required this.id,
-    this.title,
-    this.discount,
-    this.imageUrl,
-    this.ctaText,
-  });
-
-  factory Offer.fromJson(Map<String, dynamic> json) => Offer(
-    id: json['id'],
-    title: json['title'],
-    discount: json['discount'],
-    imageUrl: json['image_url'],
-    ctaText: json['cta_text'],
-  );
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'discount': discount,
-    'image_url': imageUrl,
-    'cta_text': ctaText,
-  };
-}
-
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
@@ -54,7 +21,7 @@ class _HomeTabState extends State<HomeTab> {
   List<Map<String, dynamic>> topWeekBooks = [];
   List<Map<String, dynamic>> vendors = [];
   List<Map<String, dynamic>> authors = [];
-  List<Offer> offers = [];
+  Map<String, dynamic>? specialOffer;
   bool isLoading = true;
 
   @override
@@ -70,27 +37,27 @@ class _HomeTabState extends State<HomeTab> {
           .select()
           .eq('is_featured', true)
           .limit(3);
+
       final topWeekResponse = await _supabase
           .from('books')
           .select()
           .eq('is_top_week', true)
           .limit(3);
+
       final vendorsResponse = await _supabase.from('vendors').select().limit(6);
+
       final authorsResponse = await _supabase.from('authors').select().limit(5);
-      final offersResponse = await _supabase.from('offers').select();
+
+      final offerResponse = await _supabase.from('offers').select();
 
       setState(() {
         featuredBooks = List<Map<String, dynamic>>.from(featuredResponse);
         topWeekBooks = List<Map<String, dynamic>>.from(topWeekResponse);
         vendors = List<Map<String, dynamic>>.from(vendorsResponse);
         authors = List<Map<String, dynamic>>.from(authorsResponse);
-
-        if (offersResponse != null) {
-          offers = List<Map<String, dynamic>>.from(
-            offersResponse,
-          ).map((e) => Offer.fromJson(e)).toList();
+        if (offerResponse.isNotEmpty) {
+          specialOffer = offerResponse.first;
         }
-
         isLoading = false;
       });
     } catch (e) {
@@ -135,11 +102,8 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
 
-          // === Special Offers ===
-          if (offers.isNotEmpty)
-            SliverToBoxAdapter(child: SpecialOfferCarousel(offers: offers)),
+          if (specialOffer != null) _buildSpecialOffer(),
 
-          // === Top of Week ===
           if (topWeekBooks.isNotEmpty) ...[
             _buildSectionHeader(
               title: 'Top of Week',
@@ -153,7 +117,6 @@ class _HomeTabState extends State<HomeTab> {
             _buildBooksList(topWeekBooks),
           ],
 
-          // === Best Vendors ===
           if (vendors.isNotEmpty) ...[
             _buildSectionHeader(
               title: 'Best Vendors',
@@ -167,7 +130,6 @@ class _HomeTabState extends State<HomeTab> {
             _buildVendorsList(),
           ],
 
-          // === Authors ===
           if (authors.isNotEmpty) ...[
             _buildSectionHeader(
               title: 'Authors',
@@ -187,7 +149,26 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Section Header ===
+  Widget _buildSpecialOffer() {
+    final offers = [
+      specialOffer!,
+      {
+        'title': 'Flash Sale',
+        'discount': 30,
+        'cta_text': 'Shop Now',
+        'image_url': specialOffer!['image_url'],
+      },
+      {
+        'title': 'Weekend Deal',
+        'discount': 40,
+        'cta_text': 'Get Yours',
+        'image_url': specialOffer!['image_url'],
+      },
+    ];
+
+    return SliverToBoxAdapter(child: SpecialOfferCarousel(offers: offers));
+  }
+
   Widget _buildSectionHeader({
     required String title,
     required VoidCallback onSeeAll,
@@ -209,7 +190,6 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Books List ===
   Widget _buildBooksList(List<Map<String, dynamic>> books) {
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -218,7 +198,10 @@ class _HomeTabState extends State<HomeTab> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
           itemCount: books.length,
-          itemBuilder: (context, index) => _buildBookCard(books[index]),
+          itemBuilder: (context, index) {
+            final book = books[index];
+            return _buildBookCard(book);
+          },
         ),
       ),
     );
@@ -276,7 +259,6 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Vendors List ===
   Widget _buildVendorsList() {
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -285,7 +267,10 @@ class _HomeTabState extends State<HomeTab> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
           itemCount: vendors.length,
-          itemBuilder: (context, index) => _buildVendorCard(vendors[index]),
+          itemBuilder: (context, index) {
+            final vendor = vendors[index];
+            return _buildVendorCard(vendor);
+          },
         ),
       ),
     );
@@ -326,7 +311,6 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  // === Authors List ===
   Widget _buildAuthorsList() {
     return SliverToBoxAdapter(
       child: SizedBox(
@@ -394,7 +378,7 @@ class _HomeTabState extends State<HomeTab> {
 
 // === Special Offer Carousel ===
 class SpecialOfferCarousel extends StatefulWidget {
-  final List<Offer> offers;
+  final List<Map<String, dynamic>> offers;
   const SpecialOfferCarousel({super.key, required this.offers});
 
   @override
@@ -464,7 +448,7 @@ class _SpecialOfferCarouselState extends State<SpecialOfferCarousel> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                offer.title ?? 'Special Offer',
+                                offer['title'] ?? 'Special Offer',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 18,
@@ -473,7 +457,7 @@ class _SpecialOfferCarouselState extends State<SpecialOfferCarousel> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Discount ${offer.discount ?? 25}%',
+                                'Discount ${offer['discount'] ?? 25}%',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 14,
@@ -489,16 +473,16 @@ class _SpecialOfferCarouselState extends State<SpecialOfferCarousel> {
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                                child: Text(offer.ctaText ?? 'Order Now'),
+                                child: Text(offer['cta_text'] ?? 'Order Now'),
                               ),
                             ],
                           ),
                         ),
-                        if (offer.imageUrl != null)
+                        if (offer['image_url'] != null)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              offer.imageUrl!,
+                              offer['image_url'],
                               height: 250,
                               width: 100,
                               fit: BoxFit.cover,
